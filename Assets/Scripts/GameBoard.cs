@@ -3,16 +3,18 @@ using UnityEngine;
 public class GameBoard : MonoBehaviour
 {
     
-    [SerializeField] private GameObject _tileToSpawn;
+    [SerializeField] private Tile _tileToSpawn;
     [SerializeField] private Vector2Int _boardSize;
-    [SerializeField] private Vector3 _tileOffset;
 
-    private GameObject[,] _tiles;
+    private Tile[,] _tiles;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //Initializing the tiles 2D array.
+        _tiles = new Tile[_boardSize.x, _boardSize.y];
         CreateTiles();
+
     }
 
     // Update is called once per frame
@@ -21,18 +23,19 @@ public class GameBoard : MonoBehaviour
         
     }
 
-    private GameObject CreateOneTile()
+    private Tile CreateOneTile()
     {
-        GameObject tile = Instantiate(_tileToSpawn, transform.position, Quaternion.identity, this.transform);
+        Tile tile = Instantiate(_tileToSpawn, transform.position, Quaternion.identity, this.transform);
 
         return tile;
     }
 
     private void CreateTiles()
     {
-        _tiles = new GameObject[_boardSize.x, _boardSize.y];
+        
         int tileXSize;
         int tileZSize;
+
 
         for (int i = 0; i < _boardSize.x; i++)
         {
@@ -40,13 +43,27 @@ public class GameBoard : MonoBehaviour
             {
                 _tiles[i, j] = CreateOneTile();
 
-                GameObject tile = _tiles[i, j];
+                Tile tile = _tiles[i, j];
                 tileXSize = (int)tile.transform.localScale.x;
                 tileZSize = (int)tile.transform.localScale.z;
 
-                tile.transform.position = new Vector3(i * (tileXSize + _tileOffset.x), 0f, j * (tileZSize + _tileOffset.z));
+                tile.transform.position = new Vector3(i * tileXSize, 0f, j * tileZSize);
 
                 tile.name = $"x: {tile.transform.position.x}, z: {tile.transform.position.z}";
+
+                //Initializing the data for each created tile
+                TileData tileData = new TileData()
+                {
+                    TilePosition = new Vector3Int(i * tileXSize, 0, j * tileXSize),
+                    TiType = TileData.TileType.Empty,
+                    Number = 0,
+                    HasExploded = false,
+                    IsFlagged = false,
+                    IsRevealed = false,
+                };
+
+                //Sets the newTileData
+                tile.InitializeData(tileData);
             }
         }
     }

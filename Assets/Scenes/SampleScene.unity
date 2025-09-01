@@ -659,7 +659,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7a4810741d41844eb887cdb62da2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tileToSpawn: {fileID: 2769728843405401106, guid: d6206df1fa93b9f469905721e0b11b4d, type: 3}
+  _tileToSpawn: {fileID: 2595804176188477512, guid: 624497abab2bbc346ba0ad444c9591ae, type: 3}
   _boardSize: {x: 6, y: 6}
   _tileOffset: {x: 0.3, y: 0, z: 0.3}
 --- !u!1 &1301629665
