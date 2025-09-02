@@ -45,8 +45,15 @@ public class CharacterMovement : MonoBehaviour
         forward.y = 0f;
         right.y = 0f;
 
+        forward.Normalize();
+        right.Normalize();
+
         //Testing phase, the player moves aligned with the camera Z and X axis.
-        _rb.linearVelocity = new Vector3(right.x * _inputManagerRef.GetDirectionValue().x * _movementSpeed, _rb.linearVelocity.y, forward.z * _inputManagerRef.GetDirectionValue().y * _movementSpeed);
+
+        Vector3 input = _inputManagerRef.GetDirectionValue();
+        Vector3 move = (right * input.x + forward * input.y).normalized * _movementSpeed;
+
+        _rb.linearVelocity = new Vector3(move.x, _rb.linearVelocity.y, move.z);
 
     }
 
