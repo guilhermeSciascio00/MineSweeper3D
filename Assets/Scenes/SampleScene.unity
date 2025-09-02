@@ -207,7 +207,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.1521234, y: 0, z: 0, w: 0.98836154}
-  m_LocalPosition: {x: -8.3, y: 2.723529, z: -4.7685847}
+  m_LocalPosition: {x: 11.5, y: 2.723529, z: -16.468584}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -516,7 +516,7 @@ Transform:
   m_GameObject: {fileID: 454793594}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -8.3, y: 1.22, z: 0}
+  m_LocalPosition: {x: 11.5, y: 1.22, z: -11.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -660,8 +660,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _tileToSpawn: {fileID: 2595804176188477512, guid: 624497abab2bbc346ba0ad444c9591ae, type: 3}
-  _boardSize: {x: 6, y: 6}
-  _tileOffset: {x: 0.3, y: 0, z: 0.3}
+  _boardSize: {x: 9, y: 9}
+  _minePositions: []
 --- !u!1 &1301629665
 GameObject:
   m_ObjectHideFlags: 0
@@ -765,7 +765,7 @@ Transform:
   m_GameObject: {fileID: 1301629665}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.18, z: 0}
+  m_LocalPosition: {x: 21.1, y: -0.18, z: 22.9}
   m_LocalScale: {x: 8, y: 8, z: 8}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -844,7 +844,7 @@ Transform:
   m_GameObject: {fileID: 1380353924}
   serializedVersion: 2
   m_LocalRotation: {x: 0.1521234, y: 0, z: 0, w: 0.98836154}
-  m_LocalPosition: {x: -8.3, y: 2.723529, z: -4.7685847}
+  m_LocalPosition: {x: 11.5, y: 2.723529, z: -16.468584}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
