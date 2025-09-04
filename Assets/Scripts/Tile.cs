@@ -1,13 +1,18 @@
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
+    [Header("References")]
+    [SerializeField] GameObject _numberCanvas;
+    [SerializeField] TextMeshProUGUI _numberText;
+
     [SerializeField] Material _baseMaterial;
     [SerializeField] Material _mineMaterial;
     //This one will need to be an array ranging from 1 to 8 or (9)
     [SerializeField] Material _numberMaterial;
-    [SerializeField] int minesAround;
+
     public TileData Data { get; private set; }
 
     private Renderer _renderer;
@@ -22,7 +27,7 @@ public class Tile : MonoBehaviour
     private void Start()
     {
         UpdateVisuals();
-        minesAround = Data.MineNumbers;
+        TurnCanvasOn();
     }
 
 
@@ -31,6 +36,7 @@ public class Tile : MonoBehaviour
         Data = data;
     }
 
+    //Debug Only
     private void UpdateVisuals()
     {
         
@@ -48,6 +54,18 @@ public class Tile : MonoBehaviour
         }
     }
 
+    //Visuals Revealed and Unrevealed.
+
+    //CanvasNumberText
+    private void TurnCanvasOn()
+    {
+        if (Data.TiType != TileData.TileType.Number) { return; }
+
+        _numberText.text = Data.MineNumbers.ToString();
+        _numberCanvas.SetActive(true);
+    }
+
+    //Method responsible for checking neighbor tiles
     public void CheckForNeighbors()
     {
         if(Data.TiType == TileData.TileType.Mine) { return; }
