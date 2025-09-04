@@ -3,11 +3,13 @@ using System.Collections.Generic;
 
 public class GameBoard : MonoBehaviour
 {
-    
+
+    [Header("Board Functions")]
     [SerializeField] private Tile _tileToSpawn;
     [SerializeField] private Vector2Int _boardSize;
     //Mine position relative to the boardTile and not the Tile position.
     [SerializeField] private List<Vector2Int> _minePositions = new List<Vector2Int>();
+
 
     private Tile[,] _tiles;
 
@@ -18,12 +20,6 @@ public class GameBoard : MonoBehaviour
         _tiles = new Tile[_boardSize.x, _boardSize.y];
         CreateTiles();
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     private Tile CreateOneTile()
@@ -39,9 +35,10 @@ public class GameBoard : MonoBehaviour
         int tileXSize;
         int tileZSize;
 
-
+        //row
         for (int i = 0; i < _boardSize.x; i++)
         {
+            //column
             for (int j = 0;  j < _boardSize.y; j++)
             {
                 _tiles[i, j] = CreateOneTile();
@@ -53,15 +50,12 @@ public class GameBoard : MonoBehaviour
                 //Here we need to take the tileSize into consideration, otherwise they'll overlap each other.
                 tile.transform.position = new Vector3(i * tileXSize, 0f, j * tileZSize);
 
-                //Reference in the grid only
-                tile.name = $"xTile: {i}, yTile: {j}";
-
                 //Initializing the data for each created tile
                 TileData tileData = new TileData()
                 {
-                    TilePosition = new Vector3Int(i * tileXSize, 0, j * tileXSize),
+                    TilePosition = new Vector2Int(i, j),
                     TiType = TileData.TileType.Empty,
-                    Number = 0,
+                    MineNumbers = 0,
                     HasExploded = false,
                     IsFlagged = false,
                     IsRevealed = false,
@@ -69,11 +63,21 @@ public class GameBoard : MonoBehaviour
 
                 //Sets the newTileData
                 tile.InitializeData(tileData);
-                
+
+                //Reference in the grid only
+                tile.name = $"xTile: {tile.Data.TilePosition.x}, yTile: {tile.Data.TilePosition.y}";
             }
             
         }
         SetMinesRandomly();
+        
+        for(int i = 0; i < _boardSize.x; i++)
+        {
+            for (int j = 0; j < _boardSize.y; j++)
+            {
+                _tiles[i,j].CheckForNeighbors();
+            }
+        }
     }
 
     private void SetMine(Vector2Int minePosition)
@@ -111,6 +115,22 @@ public class GameBoard : MonoBehaviour
                 SetMine(randomPos);
             }
         }
+    }
+
+    public Tile GetTile(int x, int y)
+    {
+        return _tiles[x, y];
+    }
+    
+    /// <summary>
+    /// Returns true if the x,y coord values are inside the bounds, use this method when verifying neighbor tiles
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    public bool IsInsideBounds(int x, int y)
+    {
+        return (x >= 0 && x < _boardSize.x) && (y >= 0 && y < _boardSize.y);
     }
 }
     
