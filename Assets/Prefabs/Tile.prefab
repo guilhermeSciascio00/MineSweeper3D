@@ -169,7 +169,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f4103e508f8b1294fa7699ee1cd75408, type: 2}
+  - {fileID: 2100000, guid: c11860a8867024449966a96e49e9dac9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -226,7 +226,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _numberCanvas: {fileID: 4258990399394464605}
   _numberText: {fileID: 1954690714467126940}
-  _unrevealedMaterial: {fileID: 2100000, guid: f4103e508f8b1294fa7699ee1cd75408, type: 2}
+  _unrevealedMaterial: {fileID: 2100000, guid: c11860a8867024449966a96e49e9dac9, type: 2}
   _revealedMaterial: {fileID: 2100000, guid: 69440872970c2c341835ec75df406524, type: 2}
   _minesAround: 0
   _tileType: 
