@@ -69,15 +69,18 @@ public class GameBoard : MonoBehaviour
             }
             
         }
-        SetMinesRandomly();
+        //This methods should only be done after the player reveal the first tile!
+
+        //SetMinesRandomly();
         
-        for(int i = 0; i < _boardSize.x; i++)
-        {
-            for (int j = 0; j < _boardSize.y; j++)
-            {
-                _tiles[i,j].CheckForNeighbors();
-            }
-        }
+        //Check for neighbors.
+        //for(int i = 0; i < _boardSize.x; i++)
+        //{
+        //    for (int j = 0; j < _boardSize.y; j++)
+        //    {
+        //        _tiles[i,j].CheckForNeighbors();
+        //    }
+        //}
     }
 
     private void SetMine(Vector2Int minePosition)
@@ -87,7 +90,7 @@ public class GameBoard : MonoBehaviour
         _minePositions.Add(minePosition);
     }
 
-    private void SetMinesRandomly()
+    private void SetMinesRandomly(/*A list of how many tiles should be avoided*/)
     {
 
         int maxMineAmount = 10;

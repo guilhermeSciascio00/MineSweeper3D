@@ -6,6 +6,8 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private float _movementSpeed;
     [SerializeField] private float _jumpForce;
     [SerializeField] private float _rotationSpeed;
+    //necessary for triggering the tile correctly
+    private bool _hasJumped =false;
 
     [Header("ChrMovement Class Reference")]
     [SerializeField] private GameInputManager _inputManagerRef;
@@ -60,6 +62,7 @@ public class CharacterMovement : MonoBehaviour
     private void PlayerJump()
     {
         _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
+        _hasJumped = true;
     }
 
     private bool IsOnGround()
@@ -76,6 +79,16 @@ public class CharacterMovement : MonoBehaviour
         Vector3 p2 = capsuleWorldCenter - Vector3.up * (_capsuleCollider.height / 2 - _capsuleCollider.radius);
 
         bool isOnGround = Physics.CheckCapsule(p1, p2, _capsuleCollider.radius + 0.02f, LayerMask.GetMask(FIELD_LAYER));
+
+        Collider[] hits = Physics.OverlapCapsule(p1, p2, _capsuleCollider.radius, LayerMask.GetMask(FIELD_LAYER));
+        
+        if(hits.Length > 0 && hits[0].GetComponent<Tile>() != null && _hasJumped)
+        {
+            Debug.Log(hits[0].name);
+            //Call the event
+            EventManager.TileJumped(hits[0].GetComponent<Tile>());
+            _hasJumped = false;
+        }
 
         return isOnGround;
     }

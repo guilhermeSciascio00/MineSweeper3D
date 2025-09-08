@@ -8,10 +8,17 @@ public class Tile : MonoBehaviour
     [SerializeField] GameObject _numberCanvas;
     [SerializeField] TextMeshProUGUI _numberText;
 
-    [SerializeField] Material _baseMaterial;
-    [SerializeField] Material _mineMaterial;
-    //This one will need to be an array ranging from 1 to 8 or (9)
-    [SerializeField] Material _numberMaterial;
+    [Header("Materials")]
+    [SerializeField] Material _unrevealedMaterial;
+    [SerializeField] Material _revealedMaterial;
+
+    [Header("DebugInfo")]
+    [SerializeField] int _minesAround;
+    [SerializeField] string _tileType;
+
+    //DebugOnly
+    //[SerializeField] Material _mineMaterial;
+    //[SerializeField] Material _numberMaterial;
 
     public TileData Data { get; private set; }
 
@@ -26,10 +33,22 @@ public class Tile : MonoBehaviour
 
     private void Start()
     {
-        UpdateVisuals();
+        UpdateTileVisual();
         TurnCanvasOn();
+        _tileType = Data.TiType.ToString();
+
+        //Events
+        EventManager.OnTileJumped += EventManager_OnTileJumped;
     }
 
+    private void EventManager_OnTileJumped(Tile obj)
+    {
+        if(!obj.Data.IsRevealed)
+        {
+            obj.Data.IsRevealed = true;
+            obj.UpdateTileVisual();
+        }
+    }
 
     public void InitializeData(TileData data)
     {
@@ -37,32 +56,47 @@ public class Tile : MonoBehaviour
     }
 
     //Debug Only
-    private void UpdateVisuals()
-    {
-        
-        switch (Data.TiType)
-        {
-            case TileData.TileType.Empty:
-                _renderer.material = _baseMaterial;
-                break;
-            case TileData.TileType.Mine:
-                _renderer.material = _mineMaterial;
-                break;
-            case TileData.TileType.Number:
-                _renderer.material = _numberMaterial;
-                break;
-        }
-    }
+    //private void UpdateVisuals()
+    //{
+    //    switch (Data.TiType)
+    //    {
+    //        case TileData.TileType.Empty:
+    //            _renderer.material = _unrevealedMaterial;
+    //            break;
+    //        case TileData.TileType.Mine:
+    //            _renderer.material = _mineMaterial;
+    //            break;
+    //        case TileData.TileType.Number:
+    //            _renderer.material = _numberMaterial;
+    //            break;
+    //    }
+    //}
 
     //Visuals Revealed and Unrevealed.
+
+
+    private void UpdateTileVisual()
+    {
+        if (!Data.IsRevealed)
+        {
+            _renderer.material = _unrevealedMaterial;
+        }
+        else
+        {
+            _renderer.material = _revealedMaterial;
+        }
+    }
 
     //CanvasNumberText
     private void TurnCanvasOn()
     {
         if (Data.TiType != TileData.TileType.Number) { return; }
 
-        _numberText.text = Data.MineNumbers.ToString();
-        _numberCanvas.SetActive(true);
+        if (Data.IsRevealed)
+        {
+            _numberText.text = Data.MineNumbers.ToString();
+            _numberCanvas.SetActive(true);
+        }
     }
 
     //Method responsible for checking neighbor tiles
@@ -106,12 +140,13 @@ public class Tile : MonoBehaviour
         {
             Data.TiType = TileData.TileType.Number;
             Data.MineNumbers = mineCount;
+            _minesAround = mineCount;
         }
         else
         {
             Data.TiType = TileData.TileType.Empty;
         }
 
-        UpdateVisuals();
+        //UpdateVisuals();
     }
 }

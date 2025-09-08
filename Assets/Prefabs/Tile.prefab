@@ -115,9 +115,9 @@ GameObject:
   - component: {fileID: 1593106032929922297}
   - component: {fileID: 6120649112411888376}
   - component: {fileID: 2595804176188477512}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Tile
-  m_TagString: Untagged
+  m_TagString: Field
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -226,9 +226,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _numberCanvas: {fileID: 4258990399394464605}
   _numberText: {fileID: 1954690714467126940}
-  _baseMaterial: {fileID: 2100000, guid: f4103e508f8b1294fa7699ee1cd75408, type: 2}
-  _mineMaterial: {fileID: 2100000, guid: ea26f0a65354ea347921540ba40eb154, type: 2}
-  _numberMaterial: {fileID: 2100000, guid: 556e05ce515704243a96d0245c2fa9ed, type: 2}
+  _unrevealedMaterial: {fileID: 2100000, guid: f4103e508f8b1294fa7699ee1cd75408, type: 2}
+  _revealedMaterial: {fileID: 2100000, guid: 69440872970c2c341835ec75df406524, type: 2}
+  _minesAround: 0
+  _tileType: 
 --- !u!1 &8952262527708558109
 GameObject:
   m_ObjectHideFlags: 0
