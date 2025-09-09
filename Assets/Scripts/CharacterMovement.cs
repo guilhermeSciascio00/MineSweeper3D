@@ -78,19 +78,19 @@ public class CharacterMovement : MonoBehaviour
 
         Vector3 p2 = capsuleWorldCenter - Vector3.up * (_capsuleCollider.height / 2 - _capsuleCollider.radius);
 
-        bool isOnGround = Physics.CheckCapsule(p1, p2, _capsuleCollider.radius + 0.02f, LayerMask.GetMask(FIELD_LAYER));
+        //bool isOnGround = Physics.CheckCapsule(p1, p2, _capsuleCollider.radius + 0.02f, LayerMask.GetMask(FIELD_LAYER));
 
         Collider[] hits = Physics.OverlapCapsule(p1, p2, _capsuleCollider.radius, LayerMask.GetMask(FIELD_LAYER));
         
         if(hits.Length > 0 && hits[0].GetComponent<Tile>() != null && _hasJumped)
         {
-            Debug.Log(hits[0].name);
+            //Debug.Log(hits[0].name);
             //Call the event
             EventManager.TileJumped(hits[0].GetComponent<Tile>());
             _hasJumped = false;
         }
 
-        return isOnGround;
+        return hits.Length > 0;
     }
 
 }

@@ -1,6 +1,6 @@
-using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Tile : MonoBehaviour
 {
@@ -21,6 +21,9 @@ public class Tile : MonoBehaviour
     //[SerializeField] Material _numberMaterial;
 
     public TileData Data { get; private set; }
+
+    private bool _isFirstTileRevealed = false;
+    private List<Vector2Int> _tileNeighbors = new List<Vector2Int>();
 
     private Renderer _renderer;
     private GameBoard _board;
@@ -47,6 +50,11 @@ public class Tile : MonoBehaviour
         {
             obj.Data.IsRevealed = true;
             obj.UpdateTileVisual();
+            if(!_isFirstTileRevealed) 
+            {
+                EventManager.FirstTileRevealed(obj);
+                _isFirstTileRevealed = true;
+            }
         }
     }
 
@@ -86,6 +94,10 @@ public class Tile : MonoBehaviour
             _renderer.material = _revealedMaterial;
         }
     }
+    public void UpdateMineTileText()
+    {
+        _tileType = Data.TiType.ToString();
+    }
 
     //CanvasNumberText
     private void TurnCanvasOn()
@@ -122,12 +134,13 @@ public class Tile : MonoBehaviour
 
                 //c stands for column and l for line
                 //checkforX and Y, stores our position + offset
-                //let's say we are in the bottom left-corner(0,0), if we want to check to the right, we are checking 1c, 0l(1 column to the right, and 0l means in the samen line)
+                //let's say we are in the bottom left-corner(0,0), if we want to check to the right, we are checking 1c, 0l(1 column to the right, and 0l means in the same line)
                 int checkForX = currentPosition.x + columnOffset;
                 int checkForY = currentPosition.y + rowOffset;
                 if(_board.IsInsideBounds(checkForX, checkForY))
                 {
                     Tile tile = _board.GetTile(checkForX, checkForY);
+                    _tileNeighbors.Add(new Vector2Int(checkForX, checkForY));
                     if(tile.Data.TiType == TileData.TileType.Mine)
                     {
                         mineCount++;
@@ -148,5 +161,10 @@ public class Tile : MonoBehaviour
         }
 
         //UpdateVisuals();
+    }
+
+    public List<Vector2Int> GetTileNeighbors()
+    {
+        return _tileNeighbors;
     }
 }
