@@ -55,6 +55,8 @@ public class Tile : MonoBehaviour
                 EventManager.FirstTileRevealed(obj);
                 _isFirstTileRevealed = true;
             }
+            //Do the scan here
+
         }
     }
 
@@ -92,9 +94,10 @@ public class Tile : MonoBehaviour
         else
         {
             _renderer.material = _revealedMaterial;
+            TurnCanvasOn();
         }
     }
-    public void UpdateMineTileText()
+    public void UpdateTileText()
     {
         _tileType = Data.TiType.ToString();
     }
@@ -154,13 +157,12 @@ public class Tile : MonoBehaviour
             Data.TiType = TileData.TileType.Number;
             Data.MineNumbers = mineCount;
             _minesAround = mineCount;
+            UpdateTileText();
         }
         else
         {
             Data.TiType = TileData.TileType.Empty;
         }
-
-        //UpdateVisuals();
     }
 
     public List<Vector2Int> GetTileNeighbors()

@@ -87,14 +87,15 @@ public class GameBoard : MonoBehaviour
     {
         Vector2Int tilePos = obj.Data.TilePosition;
         _tiles[tilePos.x, tilePos.y].CheckForNeighbors();
-        SetMinesRandomly(obj.GetTileNeighbors()); 
+        SetMinesRandomly(obj.GetTileNeighbors());
+        CheckNeighborsInTheBoard();
     }
 
     private void SetMine(Vector2Int minePosition)
     {
         _tiles[minePosition.x, minePosition.y].Data.TiType = TileData.TileType.Mine;
 
-        _tiles[minePosition.x, minePosition.y].UpdateMineTileText();
+        _tiles[minePosition.x, minePosition.y].UpdateTileText();
 
         _minePositions.Add(minePosition);
     }
@@ -117,7 +118,7 @@ public class GameBoard : MonoBehaviour
             randomPos = new Vector2Int(randomX, randomY);
 
             //if it already exists in our _minePositions list or in the tiles that we asked tot ignore, we skip
-            if (_minePositions.Contains(randomPos) || tilesToIgnore.Contains(randomPos))
+            if (_minePositions.Contains(randomPos) || tilesToIgnore.Contains(randomPos) || _tiles[randomPos.x, randomPos.y].Data.IsRevealed)
             {
                 continue;
             }
@@ -125,6 +126,17 @@ public class GameBoard : MonoBehaviour
             else
             {
                 SetMine(randomPos);
+            }
+        }
+    }
+
+    private void CheckNeighborsInTheBoard()
+    {
+        for (int i = 0; i < _boardSize.x; i++)
+        {
+            for (int j = 0; j < _boardSize.y; j++)
+            {
+                _tiles[i, j].CheckForNeighbors();
             }
         }
     }
