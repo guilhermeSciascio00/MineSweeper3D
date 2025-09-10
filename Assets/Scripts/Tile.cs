@@ -48,15 +48,13 @@ public class Tile : MonoBehaviour
     {
         if(!obj.Data.IsRevealed)
         {
-            obj.Data.IsRevealed = true;
-            obj.UpdateTileVisual();
             if(!_isFirstTileRevealed) 
             {
                 EventManager.FirstTileRevealed(obj);
                 _isFirstTileRevealed = true;
             }
-            //Do the scan here
-
+            //Do the recursive scan here
+            FloodFillAlg(_board, obj.Data.TilePosition);
         }
     }
 
@@ -168,5 +166,44 @@ public class Tile : MonoBehaviour
     public List<Vector2Int> GetTileNeighbors()
     {
         return _tileNeighbors;
+    }
+
+    //Recursive method
+    private void FloodFillAlg(GameBoard board, Vector2Int startingPos)
+    {
+        //Debug.Log("Testing flag0");
+
+        if (!board.IsInsideBounds(startingPos.x, startingPos.y) || board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed)
+        {
+            return;
+        }
+
+        //Debug.Log("Testing flag1");
+        if (board.GetTile(startingPos.x, startingPos.y).Data.TiType != TileData.TileType.Empty) 
+        {
+            if(board.GetTile(startingPos.x,startingPos.y).Data.TiType == TileData.TileType.Number) 
+            {
+                board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
+                board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
+
+            }
+
+            return; 
+        }
+
+        //Debug.Log("Testing flag2");
+        board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
+        board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
+
+        //Debug.Log("Testing flag3");
+        Tile currentTile = board.GetTile(startingPos.x, startingPos.y);
+        if(currentTile.GetTileNeighbors().Count <= 0)
+        {
+            currentTile.CheckForNeighbors();
+        }
+        foreach (Vector2Int neighbor in currentTile.GetTileNeighbors())
+        {
+            FloodFillAlg(board, neighbor);
+        }
     }
 }
