@@ -11,6 +11,7 @@ public class Tile : MonoBehaviour
     [Header("Materials")]
     [SerializeField] Material _unrevealedMaterial;
     [SerializeField] Material _revealedMaterial;
+    [SerializeField] Material _mineMaterial;
 
     [Header("DebugInfo")]
     [SerializeField] int _minesAround;
@@ -52,6 +53,13 @@ public class Tile : MonoBehaviour
             {
                 EventManager.FirstTileRevealed(obj);
                 _isFirstTileRevealed = true;
+            }
+
+            if(obj.Data.TiType == TileData.TileType.Mine)
+            {
+                obj._renderer.material = _mineMaterial;
+                EventManager.GameOver();
+                return;
             }
             //Do the recursive scan here
             FloodFillAlg(_board, obj.Data.TilePosition);
@@ -168,7 +176,14 @@ public class Tile : MonoBehaviour
         return _tileNeighbors;
     }
 
+    public Material GetMineMaterial() {  return _mineMaterial; }
+
     //Recursive method
+    /// <summary>
+    /// The first parameter here is the current game board, and the second one is the tile position.
+    /// </summary>
+    /// <param name="board"></param>
+    /// <param name="startingPos"></param>
     private void FloodFillAlg(GameBoard board, Vector2Int startingPos)
     {
         //Debug.Log("Testing flag0");
@@ -192,15 +207,19 @@ public class Tile : MonoBehaviour
         }
 
         //Debug.Log("Testing flag2");
+        //Empty Tile
         board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
         board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
 
         //Debug.Log("Testing flag3");
         Tile currentTile = board.GetTile(startingPos.x, startingPos.y);
+
+        //Here it's important to check if the neighbor counts is lequal than zero, because if so, there won't be any neighbors around and we'll have to Check for it so the game doesn't throw us an error.
         if(currentTile.GetTileNeighbors().Count <= 0)
         {
             currentTile.CheckForNeighbors();
         }
+
         foreach (Vector2Int neighbor in currentTile.GetTileNeighbors())
         {
             FloodFillAlg(board, neighbor);

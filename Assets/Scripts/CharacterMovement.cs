@@ -15,12 +15,18 @@ public class CharacterMovement : MonoBehaviour
 
     private Rigidbody _rb;
     private CapsuleCollider _capsuleCollider;
+
+    private bool _isGameOver = false;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
         _capsuleCollider = GetComponent<CapsuleCollider>();
+        EventManager.OnGameOver += OnGameOverTriggered;
     }
+
+
 
     private void FixedUpdate()
     {
@@ -31,16 +37,16 @@ public class CharacterMovement : MonoBehaviour
             PlayerJump();
         }
     }
-
-    //private void MovePlayer()
-    //{
-
-    //    _rb.linearVelocity = new Vector3(_inputManagerRef.GetDirectionValue().x * _movementSpeed, _rb.linearVelocity.y, _inputManagerRef.GetDirectionValue().y * _movementSpeed);
-    //}
+    private void OnGameOverTriggered()
+    {
+        _isGameOver = true;
+    }
 
     //This method move the player based in the direction which the camera is facing.
     private void PlayerMovementAligned()
     {
+        if(_isGameOver) { return; }
+
         Vector3 forward = _cameraTransform.forward;
         Vector3 right = _cameraTransform.right;
 
