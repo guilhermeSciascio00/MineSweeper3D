@@ -1,6 +1,6 @@
-using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Tile : MonoBehaviour
 {
@@ -8,12 +8,23 @@ public class Tile : MonoBehaviour
     [SerializeField] GameObject _numberCanvas;
     [SerializeField] TextMeshProUGUI _numberText;
 
-    [SerializeField] Material _baseMaterial;
+    [Header("Materials")]
+    [SerializeField] Material _unrevealedMaterial;
+    [SerializeField] Material _revealedMaterial;
     [SerializeField] Material _mineMaterial;
-    //This one will need to be an array ranging from 1 to 8 or (9)
-    [SerializeField] Material _numberMaterial;
+
+    [Header("DebugInfo")]
+    [SerializeField] int _minesAround;
+    [SerializeField] string _tileType;
+
+    //DebugOnly
+    //[SerializeField] Material _mineMaterial;
+    //[SerializeField] Material _numberMaterial;
 
     public TileData Data { get; private set; }
+
+    private bool _isFirstTileRevealed = false;
+    private List<Vector2Int> _tileNeighbors = new List<Vector2Int>();
 
     private Renderer _renderer;
     private GameBoard _board;
@@ -26,10 +37,34 @@ public class Tile : MonoBehaviour
 
     private void Start()
     {
-        UpdateVisuals();
+        UpdateTileVisual();
         TurnCanvasOn();
+        _tileType = Data.TiType.ToString();
+
+        //Events
+        EventManager.OnTileJumped += EventManager_OnTileJumped;
     }
 
+    private void EventManager_OnTileJumped(Tile obj)
+    {
+        if(!obj.Data.IsRevealed)
+        {
+            if(!_isFirstTileRevealed) 
+            {
+                EventManager.FirstTileRevealed(obj);
+                _isFirstTileRevealed = true;
+            }
+
+            if(obj.Data.TiType == TileData.TileType.Mine)
+            {
+                obj._renderer.material = _mineMaterial;
+                EventManager.GameOver();
+                return;
+            }
+            //Do the recursive scan here
+            FloodFillAlg(_board, obj.Data.TilePosition);
+        }
+    }
 
     public void InitializeData(TileData data)
     {
@@ -37,32 +72,52 @@ public class Tile : MonoBehaviour
     }
 
     //Debug Only
-    private void UpdateVisuals()
-    {
-        
-        switch (Data.TiType)
-        {
-            case TileData.TileType.Empty:
-                _renderer.material = _baseMaterial;
-                break;
-            case TileData.TileType.Mine:
-                _renderer.material = _mineMaterial;
-                break;
-            case TileData.TileType.Number:
-                _renderer.material = _numberMaterial;
-                break;
-        }
-    }
+    //private void UpdateVisuals()
+    //{
+    //    switch (Data.TiType)
+    //    {
+    //        case TileData.TileType.Empty:
+    //            _renderer.material = _unrevealedMaterial;
+    //            break;
+    //        case TileData.TileType.Mine:
+    //            _renderer.material = _mineMaterial;
+    //            break;
+    //        case TileData.TileType.Number:
+    //            _renderer.material = _numberMaterial;
+    //            break;
+    //    }
+    //}
 
     //Visuals Revealed and Unrevealed.
+
+
+    private void UpdateTileVisual()
+    {
+        if (!Data.IsRevealed)
+        {
+            _renderer.material = _unrevealedMaterial;
+        }
+        else
+        {
+            _renderer.material = _revealedMaterial;
+            TurnCanvasOn();
+        }
+    }
+    public void UpdateTileText()
+    {
+        _tileType = Data.TiType.ToString();
+    }
 
     //CanvasNumberText
     private void TurnCanvasOn()
     {
         if (Data.TiType != TileData.TileType.Number) { return; }
 
-        _numberText.text = Data.MineNumbers.ToString();
-        _numberCanvas.SetActive(true);
+        if (Data.IsRevealed)
+        {
+            _numberText.text = Data.MineNumbers.ToString();
+            _numberCanvas.SetActive(true);
+        }
     }
 
     //Method responsible for checking neighbor tiles
@@ -88,12 +143,13 @@ public class Tile : MonoBehaviour
 
                 //c stands for column and l for line
                 //checkforX and Y, stores our position + offset
-                //let's say we are in the bottom left-corner(0,0), if we want to check to the right, we are checking 1c, 0l(1 column to the right, and 0l means in the samen line)
+                //let's say we are in the bottom left-corner(0,0), if we want to check to the right, we are checking 1c, 0l(1 column to the right, and 0l means in the same line)
                 int checkForX = currentPosition.x + columnOffset;
                 int checkForY = currentPosition.y + rowOffset;
                 if(_board.IsInsideBounds(checkForX, checkForY))
                 {
                     Tile tile = _board.GetTile(checkForX, checkForY);
+                    _tileNeighbors.Add(new Vector2Int(checkForX, checkForY));
                     if(tile.Data.TiType == TileData.TileType.Mine)
                     {
                         mineCount++;
@@ -106,12 +162,67 @@ public class Tile : MonoBehaviour
         {
             Data.TiType = TileData.TileType.Number;
             Data.MineNumbers = mineCount;
+            _minesAround = mineCount;
+            UpdateTileText();
         }
         else
         {
             Data.TiType = TileData.TileType.Empty;
         }
+    }
 
-        UpdateVisuals();
+    public List<Vector2Int> GetTileNeighbors()
+    {
+        return _tileNeighbors;
+    }
+
+    public Material GetMineMaterial() {  return _mineMaterial; }
+
+    //Recursive method
+    /// <summary>
+    /// The first parameter here is the current game board, and the second one is the tile position.
+    /// </summary>
+    /// <param name="board"></param>
+    /// <param name="startingPos"></param>
+    private void FloodFillAlg(GameBoard board, Vector2Int startingPos)
+    {
+        //Debug.Log("Testing flag0");
+
+        if (!board.IsInsideBounds(startingPos.x, startingPos.y) || board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed)
+        {
+            return;
+        }
+
+        //Debug.Log("Testing flag1");
+        if (board.GetTile(startingPos.x, startingPos.y).Data.TiType != TileData.TileType.Empty) 
+        {
+            if(board.GetTile(startingPos.x,startingPos.y).Data.TiType == TileData.TileType.Number) 
+            {
+                board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
+                board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
+
+            }
+
+            return; 
+        }
+
+        //Debug.Log("Testing flag2");
+        //Empty Tile
+        board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
+        board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
+
+        //Debug.Log("Testing flag3");
+        Tile currentTile = board.GetTile(startingPos.x, startingPos.y);
+
+        //Here it's important to check if the neighbor counts is lequal than zero, because if so, there won't be any neighbors around and we'll have to Check for it so the game doesn't throw us an error.
+        if(currentTile.GetTileNeighbors().Count <= 0)
+        {
+            currentTile.CheckForNeighbors();
+        }
+
+        foreach (Vector2Int neighbor in currentTile.GetTileNeighbors())
+        {
+            FloodFillAlg(board, neighbor);
+        }
     }
 }

@@ -10,7 +10,6 @@ public class GameBoard : MonoBehaviour
     //Mine position relative to the boardTile and not the Tile position.
     [SerializeField] private List<Vector2Int> _minePositions = new List<Vector2Int>();
 
-
     private Tile[,] _tiles;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -20,6 +19,7 @@ public class GameBoard : MonoBehaviour
         _tiles = new Tile[_boardSize.x, _boardSize.y];
         CreateTiles();
 
+        EventManager.OnFirstTileRevealed += OnTileFirstRevealed;
     }
 
     private Tile CreateOneTile()
@@ -69,25 +69,38 @@ public class GameBoard : MonoBehaviour
             }
             
         }
-        SetMinesRandomly();
+        //This methods should only be done after the player reveal the first tile!
+
+        //SetMinesRandomly(new List<Vector2Int> { new Vector2Int(0,0)});
         
-        for(int i = 0; i < _boardSize.x; i++)
-        {
-            for (int j = 0; j < _boardSize.y; j++)
-            {
-                _tiles[i,j].CheckForNeighbors();
-            }
-        }
+        //Check for neighbors.
+        //for(int i = 0; i < _boardSize.x; i++)
+        //{
+        //    for (int j = 0; j < _boardSize.y; j++)
+        //    {
+        //        _tiles[i,j].CheckForNeighbors();
+        //    }
+        //}
+    }
+
+    private void OnTileFirstRevealed(Tile obj)
+    {
+        Vector2Int tilePos = obj.Data.TilePosition;
+        _tiles[tilePos.x, tilePos.y].CheckForNeighbors();
+        SetMinesRandomly(obj.GetTileNeighbors());
+        CheckNeighborsInTheBoard();
     }
 
     private void SetMine(Vector2Int minePosition)
     {
         _tiles[minePosition.x, minePosition.y].Data.TiType = TileData.TileType.Mine;
 
+        _tiles[minePosition.x, minePosition.y].UpdateTileText();
+
         _minePositions.Add(minePosition);
     }
 
-    private void SetMinesRandomly()
+    private void SetMinesRandomly(List<Vector2Int> tilesToIgnore)
     {
 
         int maxMineAmount = 10;
@@ -104,8 +117,8 @@ public class GameBoard : MonoBehaviour
             randomY = Random.Range(0, _boardSize.y);
             randomPos = new Vector2Int(randomX, randomY);
 
-            //if it already exists in our _minePositions list, we skip
-            if (_minePositions.Contains(randomPos))
+            //if it already exists in our _minePositions list or in the tiles that we asked tot ignore, we skip
+            if (_minePositions.Contains(randomPos) || tilesToIgnore.Contains(randomPos) || _tiles[randomPos.x, randomPos.y].Data.IsRevealed)
             {
                 continue;
             }
@@ -113,6 +126,17 @@ public class GameBoard : MonoBehaviour
             else
             {
                 SetMine(randomPos);
+            }
+        }
+    }
+
+    private void CheckNeighborsInTheBoard()
+    {
+        for (int i = 0; i < _boardSize.x; i++)
+        {
+            for (int j = 0; j < _boardSize.y; j++)
+            {
+                _tiles[i, j].CheckForNeighbors();
             }
         }
     }
