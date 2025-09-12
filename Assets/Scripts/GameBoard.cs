@@ -87,7 +87,7 @@ public class GameBoard : MonoBehaviour
     {
         Vector2Int tilePos = obj.Data.TilePosition;
         _tiles[tilePos.x, tilePos.y].CheckForNeighbors();
-        SetMinesRandomly(obj.GetTileNeighbors());
+        SetMinesRandomly(obj.GetTileNeighbors(), tilePos);
         CheckNeighborsInTheBoard();
     }
 
@@ -100,7 +100,7 @@ public class GameBoard : MonoBehaviour
         _minePositions.Add(minePosition);
     }
 
-    private void SetMinesRandomly(List<Vector2Int> tilesToIgnore)
+    private void SetMinesRandomly(List<Vector2Int> tilesToIgnore, Vector2Int firstTilePos)
     {
 
         int maxMineAmount = 10;
@@ -118,7 +118,7 @@ public class GameBoard : MonoBehaviour
             randomPos = new Vector2Int(randomX, randomY);
 
             //if it already exists in our _minePositions list or in the tiles that we asked tot ignore, we skip
-            if (_minePositions.Contains(randomPos) || tilesToIgnore.Contains(randomPos) || _tiles[randomPos.x, randomPos.y].Data.IsRevealed)
+            if (_minePositions.Contains(randomPos) || tilesToIgnore.Contains(randomPos) || randomPos == firstTilePos)
             {
                 continue;
             }
