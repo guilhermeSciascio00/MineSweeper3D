@@ -18,14 +18,8 @@ public class Tile : MonoBehaviour
     [SerializeField] int _minesAround;
     [SerializeField] string _tileType;
 
-    //DebugOnly
-    //[SerializeField] Material _mineMaterial;
-    //[SerializeField] Material _numberMaterial;
-
     public TileData Data { get; private set; }
 
-    private bool _isFirstTileRevealed = false;
-    private bool _isGameOver = false;
     private List<Vector2Int> _tileNeighbors = new List<Vector2Int>();
 
     private Renderer _renderer;

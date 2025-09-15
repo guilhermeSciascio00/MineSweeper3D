@@ -12,7 +12,9 @@ public class GameBoard : MonoBehaviour
     [SerializeField] private List<Vector2Int> _minePositions = new List<Vector2Int>();
 
     private Tile[,] _tiles;
+
     private bool _firstTileRevealed = false;
+    private bool _isGameOver = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -36,23 +38,37 @@ public class GameBoard : MonoBehaviour
                 EventManager.FirstTileRevealed(obj);
             }
 
+            if(obj.Data.TiType == TileData.TileType.Mine)
+            {
+                obj.GetComponent<Renderer>().material = obj.GetMineMaterial();
+
+                obj.PlayExplosionVFX();
+                obj.Data.IsRevealed = true;
+
+                EventManager.GameOver();
+            }
+
             FloodFillAlg(this, obj.Data.TilePosition);
         }
     }
 
     private void GameOverSequence()
     {
-        Debug.Log("Times");
-        //StartCoroutine(MineExplosionCoroutine());
+        _isGameOver = true;
+        StartCoroutine(MineExplosionCoroutine());
     }
 
     IEnumerator MineExplosionCoroutine()
     {
         foreach(Vector2Int minePos in _minePositions)
         {
+            if (_tiles[minePos.x, minePos.y].Data.IsRevealed) { yield return new WaitForSeconds(.1f); }
+
             _tiles[minePos.x, minePos.y].GetComponent<Renderer>().material = _tiles[minePos.x, minePos.y].GetMineMaterial();
-            //_tiles[minePos.x, minePos.y].PlayExplosionVFX();
-            yield return new WaitForSeconds(.4f);
+
+            _tiles[minePos.x, minePos.y].PlayExplosionVFX();
+            _tiles[minePos.x, minePos.y].Data.IsRevealed = true;
+            yield return new WaitForSeconds(.2f);
         }
         
     }
@@ -200,6 +216,9 @@ public class GameBoard : MonoBehaviour
     /// <param name="startingPos"></param>
     private void FloodFillAlg(GameBoard board, Vector2Int startingPos)
     {
+
+        if(_isGameOver) { return; }
+
         //Debug.Log("Testing flag 0");
 
         if (!board.IsInsideBounds(startingPos.x, startingPos.y) || board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed)
