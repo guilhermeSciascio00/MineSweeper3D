@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class GameBoard : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class GameBoard : MonoBehaviour
     [SerializeField] private List<Vector2Int> _minePositions = new List<Vector2Int>();
 
     private Tile[,] _tiles;
+    private bool _firstTileRevealed = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -20,6 +22,39 @@ public class GameBoard : MonoBehaviour
         CreateTiles();
 
         EventManager.OnFirstTileRevealed += OnTileFirstRevealed;
+        EventManager.OnGameOver += GameOverSequence;
+        EventManager.OnTileJumped += TileJumped;
+    }
+
+    private void TileJumped(Tile obj)
+    {
+        if (!obj.Data.IsRevealed)
+        {
+            if (!_firstTileRevealed)
+            {
+                _firstTileRevealed = true;
+                EventManager.FirstTileRevealed(obj);
+            }
+
+            FloodFillAlg(this, obj.Data.TilePosition);
+        }
+    }
+
+    private void GameOverSequence()
+    {
+        Debug.Log("Times");
+        //StartCoroutine(MineExplosionCoroutine());
+    }
+
+    IEnumerator MineExplosionCoroutine()
+    {
+        foreach(Vector2Int minePos in _minePositions)
+        {
+            _tiles[minePos.x, minePos.y].GetComponent<Renderer>().material = _tiles[minePos.x, minePos.y].GetMineMaterial();
+            //_tiles[minePos.x, minePos.y].PlayExplosionVFX();
+            yield return new WaitForSeconds(.4f);
+        }
+        
     }
 
     private Tile CreateOneTile()
@@ -103,7 +138,7 @@ public class GameBoard : MonoBehaviour
     private void SetMinesRandomly(List<Vector2Int> tilesToIgnore, Vector2Int firstTilePos)
     {
 
-        int maxMineAmount = 10;
+        int maxMineAmount = 15;
 
         int randomX;
         int randomY;
@@ -155,6 +190,54 @@ public class GameBoard : MonoBehaviour
     public bool IsInsideBounds(int x, int y)
     {
         return (x >= 0 && x < _boardSize.x) && (y >= 0 && y < _boardSize.y);
+    }
+
+    //Recursive method
+    /// <summary>
+    /// The first parameter here is the current game board, and the second one is the tile position.
+    /// </summary>
+    /// <param name="board"></param>
+    /// <param name="startingPos"></param>
+    private void FloodFillAlg(GameBoard board, Vector2Int startingPos)
+    {
+        //Debug.Log("Testing flag 0");
+
+        if (!board.IsInsideBounds(startingPos.x, startingPos.y) || board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed)
+        {
+            return;
+        }
+
+        //Debug.Log("Testing flag1");
+        if (board.GetTile(startingPos.x, startingPos.y).Data.TiType != TileData.TileType.Empty)
+        {
+            if (board.GetTile(startingPos.x, startingPos.y).Data.TiType == TileData.TileType.Number)
+            {
+                board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
+                board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
+
+            }
+
+            return;
+        }
+
+        //Debug.Log("Testing flag2");
+        //Empty Tile
+        board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
+        board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
+
+        //Debug.Log("Testing flag3");
+        Tile currentTile = board.GetTile(startingPos.x, startingPos.y);
+
+        //Here it's important to check if the neighbor counts is lequal than zero, because if so, there won't be any neighbors around and we'll have to Check for it so the game doesn't throw us an error.
+        if (currentTile.GetTileNeighbors().Count <= 0)
+        {
+            currentTile.CheckForNeighbors();
+        }
+
+        foreach (Vector2Int neighbor in currentTile.GetTileNeighbors())
+        {
+            FloodFillAlg(board, neighbor);
+        }
     }
 }
     
