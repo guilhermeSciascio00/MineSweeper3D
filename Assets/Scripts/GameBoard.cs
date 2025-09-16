@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class GameBoard : MonoBehaviour
 {
@@ -8,8 +9,13 @@ public class GameBoard : MonoBehaviour
     [Header("Board Functions")]
     [SerializeField] private Tile _tileToSpawn;
     [SerializeField] private Vector2Int _boardSize;
+    [SerializeField] private int _mineAmount = 15;
     //Mine position relative to the boardTile and not the Tile position.
     [SerializeField] private List<Vector2Int> _minePositions = new List<Vector2Int>();
+
+    [Header("Debug")]
+    [SerializeField] int _tilesRevealed;
+    private int _totalNonMineTiles;
 
     private Tile[,] _tiles;
 
@@ -26,10 +32,21 @@ public class GameBoard : MonoBehaviour
         EventManager.OnFirstTileRevealed += OnTileFirstRevealed;
         EventManager.OnGameOver += GameOverSequence;
         EventManager.OnTileJumped += TileJumped;
+        _totalNonMineTiles = (_boardSize.x * _boardSize.y) - _mineAmount;
+    }
+
+    private void Update()
+    {
+        if (_tilesRevealed == _totalNonMineTiles)
+        {
+            Debug.Log("You won!!!");
+            EventManager.GameWon();
+        }
     }
 
     private void TileJumped(Tile obj)
     {
+
         if (!obj.Data.IsRevealed)
         {
             if (!_firstTileRevealed)
@@ -153,15 +170,12 @@ public class GameBoard : MonoBehaviour
 
     private void SetMinesRandomly(List<Vector2Int> tilesToIgnore, Vector2Int firstTilePos)
     {
-
-        int maxMineAmount = 15;
-
         int randomX;
         int randomY;
 
         Vector2Int randomPos;
 
-        while (_minePositions.Count < maxMineAmount)
+        while (_minePositions.Count < _mineAmount)
         {
             //Gets a random position between the 0 and the gameBoard
             randomX = Random.Range(0, _boardSize.x);
@@ -233,7 +247,7 @@ public class GameBoard : MonoBehaviour
             {
                 board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
                 board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
-
+                _tilesRevealed++;
             }
 
             return;
@@ -243,6 +257,7 @@ public class GameBoard : MonoBehaviour
         //Empty Tile
         board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
         board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
+        _tilesRevealed++;
 
         //Debug.Log("Testing flag3");
         Tile currentTile = board.GetTile(startingPos.x, startingPos.y);
