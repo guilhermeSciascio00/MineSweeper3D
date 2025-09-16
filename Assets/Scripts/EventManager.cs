@@ -7,6 +7,7 @@ public class EventManager : MonoBehaviour
     public static event Action<Tile> OnTileJumped;
     public static event Action<Tile> OnFirstTileRevealed;
     public static event Action OnGameOver;
+    public static event Action OnGameWon;
 
     public static void TileJumped(Tile tile)
     {
@@ -22,5 +23,10 @@ public class EventManager : MonoBehaviour
     public static void GameOver()
     {
         OnGameOver?.Invoke();
+    }
+
+    public static void GameWon()
+    {
+        OnGameWon?.Invoke();
     }
 }

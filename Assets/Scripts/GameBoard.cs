@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
+using Unity.VisualScripting;
 
 public class GameBoard : MonoBehaviour
 {
@@ -7,10 +9,18 @@ public class GameBoard : MonoBehaviour
     [Header("Board Functions")]
     [SerializeField] private Tile _tileToSpawn;
     [SerializeField] private Vector2Int _boardSize;
+    [SerializeField] private int _mineAmount = 15;
     //Mine position relative to the boardTile and not the Tile position.
     [SerializeField] private List<Vector2Int> _minePositions = new List<Vector2Int>();
 
+    [Header("Debug")]
+    [SerializeField] int _tilesRevealed;
+    private int _totalNonMineTiles;
+
     private Tile[,] _tiles;
+
+    private bool _firstTileRevealed = false;
+    private bool _isGameOver = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -20,6 +30,64 @@ public class GameBoard : MonoBehaviour
         CreateTiles();
 
         EventManager.OnFirstTileRevealed += OnTileFirstRevealed;
+        EventManager.OnGameOver += GameOverSequence;
+        EventManager.OnTileJumped += TileJumped;
+        _totalNonMineTiles = (_boardSize.x * _boardSize.y) - _mineAmount;
+    }
+
+    private void Update()
+    {
+        if (_tilesRevealed == _totalNonMineTiles)
+        {
+            Debug.Log("You won!!!");
+            EventManager.GameWon();
+        }
+    }
+
+    private void TileJumped(Tile obj)
+    {
+
+        if (!obj.Data.IsRevealed)
+        {
+            if (!_firstTileRevealed)
+            {
+                _firstTileRevealed = true;
+                EventManager.FirstTileRevealed(obj);
+            }
+
+            if(obj.Data.TiType == TileData.TileType.Mine)
+            {
+                obj.GetComponent<Renderer>().material = obj.GetMineMaterial();
+
+                obj.PlayExplosionVFX();
+                obj.Data.IsRevealed = true;
+
+                EventManager.GameOver();
+            }
+
+            FloodFillAlg(this, obj.Data.TilePosition);
+        }
+    }
+
+    private void GameOverSequence()
+    {
+        _isGameOver = true;
+        StartCoroutine(MineExplosionCoroutine());
+    }
+
+    IEnumerator MineExplosionCoroutine()
+    {
+        foreach(Vector2Int minePos in _minePositions)
+        {
+            if (_tiles[minePos.x, minePos.y].Data.IsRevealed) { yield return new WaitForSeconds(.1f); }
+
+            _tiles[minePos.x, minePos.y].GetComponent<Renderer>().material = _tiles[minePos.x, minePos.y].GetMineMaterial();
+
+            _tiles[minePos.x, minePos.y].PlayExplosionVFX();
+            _tiles[minePos.x, minePos.y].Data.IsRevealed = true;
+            yield return new WaitForSeconds(.2f);
+        }
+        
     }
 
     private Tile CreateOneTile()
@@ -87,7 +155,7 @@ public class GameBoard : MonoBehaviour
     {
         Vector2Int tilePos = obj.Data.TilePosition;
         _tiles[tilePos.x, tilePos.y].CheckForNeighbors();
-        SetMinesRandomly(obj.GetTileNeighbors());
+        SetMinesRandomly(obj.GetTileNeighbors(), tilePos);
         CheckNeighborsInTheBoard();
     }
 
@@ -100,17 +168,14 @@ public class GameBoard : MonoBehaviour
         _minePositions.Add(minePosition);
     }
 
-    private void SetMinesRandomly(List<Vector2Int> tilesToIgnore)
+    private void SetMinesRandomly(List<Vector2Int> tilesToIgnore, Vector2Int firstTilePos)
     {
-
-        int maxMineAmount = 10;
-
         int randomX;
         int randomY;
 
         Vector2Int randomPos;
 
-        while (_minePositions.Count < maxMineAmount)
+        while (_minePositions.Count < _mineAmount)
         {
             //Gets a random position between the 0 and the gameBoard
             randomX = Random.Range(0, _boardSize.x);
@@ -118,7 +183,7 @@ public class GameBoard : MonoBehaviour
             randomPos = new Vector2Int(randomX, randomY);
 
             //if it already exists in our _minePositions list or in the tiles that we asked tot ignore, we skip
-            if (_minePositions.Contains(randomPos) || tilesToIgnore.Contains(randomPos) || _tiles[randomPos.x, randomPos.y].Data.IsRevealed)
+            if (_minePositions.Contains(randomPos) || tilesToIgnore.Contains(randomPos) || randomPos == firstTilePos)
             {
                 continue;
             }
@@ -155,6 +220,58 @@ public class GameBoard : MonoBehaviour
     public bool IsInsideBounds(int x, int y)
     {
         return (x >= 0 && x < _boardSize.x) && (y >= 0 && y < _boardSize.y);
+    }
+
+    //Recursive method
+    /// <summary>
+    /// The first parameter here is the current game board, and the second one is the tile position.
+    /// </summary>
+    /// <param name="board"></param>
+    /// <param name="startingPos"></param>
+    private void FloodFillAlg(GameBoard board, Vector2Int startingPos)
+    {
+
+        if(_isGameOver) { return; }
+
+        //Debug.Log("Testing flag 0");
+
+        if (!board.IsInsideBounds(startingPos.x, startingPos.y) || board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed)
+        {
+            return;
+        }
+
+        //Debug.Log("Testing flag1");
+        if (board.GetTile(startingPos.x, startingPos.y).Data.TiType != TileData.TileType.Empty)
+        {
+            if (board.GetTile(startingPos.x, startingPos.y).Data.TiType == TileData.TileType.Number)
+            {
+                board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
+                board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
+                _tilesRevealed++;
+            }
+
+            return;
+        }
+
+        //Debug.Log("Testing flag2");
+        //Empty Tile
+        board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
+        board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
+        _tilesRevealed++;
+
+        //Debug.Log("Testing flag3");
+        Tile currentTile = board.GetTile(startingPos.x, startingPos.y);
+
+        //Here it's important to check if the neighbor counts is lequal than zero, because if so, there won't be any neighbors around and we'll have to Check for it so the game doesn't throw us an error.
+        if (currentTile.GetTileNeighbors().Count <= 0)
+        {
+            currentTile.CheckForNeighbors();
+        }
+
+        foreach (Vector2Int neighbor in currentTile.GetTileNeighbors())
+        {
+            FloodFillAlg(board, neighbor);
+        }
     }
 }
     

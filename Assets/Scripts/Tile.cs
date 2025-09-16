@@ -12,18 +12,14 @@ public class Tile : MonoBehaviour
     [SerializeField] Material _unrevealedMaterial;
     [SerializeField] Material _revealedMaterial;
     [SerializeField] Material _mineMaterial;
+    [SerializeField] ParticleSystem _explosionParticles;
 
     [Header("DebugInfo")]
     [SerializeField] int _minesAround;
     [SerializeField] string _tileType;
 
-    //DebugOnly
-    //[SerializeField] Material _mineMaterial;
-    //[SerializeField] Material _numberMaterial;
-
     public TileData Data { get; private set; }
 
-    private bool _isFirstTileRevealed = false;
     private List<Vector2Int> _tileNeighbors = new List<Vector2Int>();
 
     private Renderer _renderer;
@@ -41,29 +37,6 @@ public class Tile : MonoBehaviour
         TurnCanvasOn();
         _tileType = Data.TiType.ToString();
 
-        //Events
-        EventManager.OnTileJumped += EventManager_OnTileJumped;
-    }
-
-    private void EventManager_OnTileJumped(Tile obj)
-    {
-        if(!obj.Data.IsRevealed)
-        {
-            if(!_isFirstTileRevealed) 
-            {
-                EventManager.FirstTileRevealed(obj);
-                _isFirstTileRevealed = true;
-            }
-
-            if(obj.Data.TiType == TileData.TileType.Mine)
-            {
-                obj._renderer.material = _mineMaterial;
-                EventManager.GameOver();
-                return;
-            }
-            //Do the recursive scan here
-            FloodFillAlg(_board, obj.Data.TilePosition);
-        }
     }
 
     public void InitializeData(TileData data)
@@ -71,27 +44,10 @@ public class Tile : MonoBehaviour
         Data = data;
     }
 
-    //Debug Only
-    //private void UpdateVisuals()
-    //{
-    //    switch (Data.TiType)
-    //    {
-    //        case TileData.TileType.Empty:
-    //            _renderer.material = _unrevealedMaterial;
-    //            break;
-    //        case TileData.TileType.Mine:
-    //            _renderer.material = _mineMaterial;
-    //            break;
-    //        case TileData.TileType.Number:
-    //            _renderer.material = _numberMaterial;
-    //            break;
-    //    }
-    //}
-
     //Visuals Revealed and Unrevealed.
 
 
-    private void UpdateTileVisual()
+    public void UpdateTileVisual()
     {
         if (!Data.IsRevealed)
         {
@@ -117,6 +73,18 @@ public class Tile : MonoBehaviour
         {
             _numberText.text = Data.MineNumbers.ToString();
             _numberCanvas.SetActive(true);
+        }
+    }
+
+    public void PlayExplosionVFX()
+    {
+        if(Data.TiType == TileData.TileType.Mine)
+        {
+            if (!_explosionParticles.isPlaying)
+            {
+                _explosionParticles.Play();
+                Debug.Log("Check");
+            }
         }
     }
 
@@ -178,51 +146,5 @@ public class Tile : MonoBehaviour
 
     public Material GetMineMaterial() {  return _mineMaterial; }
 
-    //Recursive method
-    /// <summary>
-    /// The first parameter here is the current game board, and the second one is the tile position.
-    /// </summary>
-    /// <param name="board"></param>
-    /// <param name="startingPos"></param>
-    private void FloodFillAlg(GameBoard board, Vector2Int startingPos)
-    {
-        //Debug.Log("Testing flag0");
 
-        if (!board.IsInsideBounds(startingPos.x, startingPos.y) || board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed)
-        {
-            return;
-        }
-
-        //Debug.Log("Testing flag1");
-        if (board.GetTile(startingPos.x, startingPos.y).Data.TiType != TileData.TileType.Empty) 
-        {
-            if(board.GetTile(startingPos.x,startingPos.y).Data.TiType == TileData.TileType.Number) 
-            {
-                board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
-                board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
-
-            }
-
-            return; 
-        }
-
-        //Debug.Log("Testing flag2");
-        //Empty Tile
-        board.GetTile(startingPos.x, startingPos.y).Data.IsRevealed = true;
-        board.GetTile(startingPos.x, startingPos.y).UpdateTileVisual();
-
-        //Debug.Log("Testing flag3");
-        Tile currentTile = board.GetTile(startingPos.x, startingPos.y);
-
-        //Here it's important to check if the neighbor counts is lequal than zero, because if so, there won't be any neighbors around and we'll have to Check for it so the game doesn't throw us an error.
-        if(currentTile.GetTileNeighbors().Count <= 0)
-        {
-            currentTile.CheckForNeighbors();
-        }
-
-        foreach (Vector2Int neighbor in currentTile.GetTileNeighbors())
-        {
-            FloodFillAlg(board, neighbor);
-        }
-    }
 }

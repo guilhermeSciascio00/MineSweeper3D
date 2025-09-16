@@ -16,7 +16,7 @@ public class CharacterMovement : MonoBehaviour
     private Rigidbody _rb;
     private CapsuleCollider _capsuleCollider;
 
-    private bool _isGameOver = false;
+    private bool _isGameFinished = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -24,6 +24,7 @@ public class CharacterMovement : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _capsuleCollider = GetComponent<CapsuleCollider>();
         EventManager.OnGameOver += OnGameOverTriggered;
+        EventManager.OnGameWon += OnGameWonTriggered;
     }
 
 
@@ -39,13 +40,18 @@ public class CharacterMovement : MonoBehaviour
     }
     private void OnGameOverTriggered()
     {
-        _isGameOver = true;
+        _isGameFinished = true;
+    }
+
+    private void OnGameWonTriggered()
+    {
+        _isGameFinished = true;
     }
 
     //This method move the player based in the direction which the camera is facing.
     private void PlayerMovementAligned()
     {
-        if(_isGameOver) { return; }
+        if(_isGameFinished) { return; }
 
         Vector3 forward = _cameraTransform.forward;
         Vector3 right = _cameraTransform.right;
