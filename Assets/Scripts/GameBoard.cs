@@ -13,6 +13,9 @@ public class GameBoard : MonoBehaviour
     //Mine position relative to the boardTile and not the Tile position.
     [SerializeField] private List<Vector2Int> _minePositions = new List<Vector2Int>();
 
+    [Header("References")]
+    [SerializeField] AudioManager _audioManager;
+
     [Header("Debug")]
     [SerializeField] int _tilesRevealed;
     private int _totalNonMineTiles;
@@ -79,13 +82,15 @@ public class GameBoard : MonoBehaviour
     {
         foreach(Vector2Int minePos in _minePositions)
         {
-            if (_tiles[minePos.x, minePos.y].Data.IsRevealed) { yield return new WaitForSeconds(.1f); }
+            if (_tiles[minePos.x, minePos.y].Data.IsRevealed) { yield return new WaitForSeconds(.4f); }
 
             _tiles[minePos.x, minePos.y].GetComponent<Renderer>().material = _tiles[minePos.x, minePos.y].GetMineMaterial();
 
             _tiles[minePos.x, minePos.y].PlayExplosionVFX();
             _tiles[minePos.x, minePos.y].Data.IsRevealed = true;
-            yield return new WaitForSeconds(.2f);
+            _audioManager.PlayExplosionSFX();
+            yield return new WaitForSeconds(.5f);
+            
         }
         
     }
