@@ -8,6 +8,7 @@ public class GameInputManager : MonoBehaviour
     private InputSystemAction _inputSysAction;
     private InputAction _movementAction;
     private InputAction _jumpAction;
+    private InputAction _gamePause;
 
     //PlayerCameraActions
 
@@ -19,6 +20,7 @@ public class GameInputManager : MonoBehaviour
         _movementAction = _inputSysAction.Player.Movement;
         _jumpAction = _inputSysAction.Player.Jump;
         _cameraZoom = _inputSysAction.Camera.CameraZoom;
+        _gamePause = _inputSysAction.GameMenu.GamePause;
     }
 
     private void OnEnable()
@@ -26,6 +28,7 @@ public class GameInputManager : MonoBehaviour
         _movementAction.Enable();
         _jumpAction.Enable();
         _cameraZoom.Enable();
+        _gamePause.Enable();
     }
 
     private void OnDisable()
@@ -33,6 +36,7 @@ public class GameInputManager : MonoBehaviour
         _movementAction?.Disable();
         _jumpAction?.Disable();
         _cameraZoom?.Disable();
+        _gamePause ?.Disable();
     }
 
     public Vector3 GetDirectionValue() => _movementAction.ReadValue<Vector2>();
@@ -40,6 +44,8 @@ public class GameInputManager : MonoBehaviour
     public bool IsJumping() => _jumpAction.IsPressed();
 
     public Vector2 GetCameraZoom() => _cameraZoom.ReadValue<Vector2>();
+
+    public bool IsPauseButtonPressed() => _gamePause.IsPressed();
 
 }
 

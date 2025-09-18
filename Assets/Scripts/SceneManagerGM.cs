@@ -1,0 +1,30 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class SceneManagerGM : MonoBehaviour
+{
+
+    private int _currentSceneIndex;
+    private const int MAIN_MENU_INDEX = 0;
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        _currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+    }
+
+    public void LoadGameScene()
+    {
+        SceneManager.LoadSceneAsync(_currentSceneIndex+1);
+    }
+
+    public void LoadMainMenu()
+    {
+        SceneManager.LoadSceneAsync(MAIN_MENU_INDEX);
+    }
+
+    public void QuitApplication()
+    {
+        Application.Quit();
+    }
+}
