@@ -12,11 +12,13 @@ public class Tile : MonoBehaviour
     [SerializeField] Material _unrevealedMaterial;
     [SerializeField] Material _revealedMaterial;
     [SerializeField] Material _mineMaterial;
+    [SerializeField] Material _flagMaterial;
     [SerializeField] ParticleSystem _explosionParticles;
 
     [Header("DebugInfo")]
     [SerializeField] int _minesAround;
     [SerializeField] string _tileType;
+    [SerializeField] bool isFlagged;
 
     public TileData Data { get; private set; }
 
@@ -39,6 +41,11 @@ public class Tile : MonoBehaviour
 
     }
 
+    private void Update()
+    {
+        isFlagged = Data.IsFlagged;
+    }
+
     public void InitializeData(TileData data)
     {
         Data = data;
@@ -59,6 +66,18 @@ public class Tile : MonoBehaviour
             TurnCanvasOn();
         }
     }
+
+    //Visuals Flag and UnFlag
+    public void SwitchToFlaggedMaterial()
+    {
+        _renderer.material = _flagMaterial;
+    }
+
+    public void SwitchToUnflaggedMaterial()
+    {
+        _renderer.material = _unrevealedMaterial;
+    }
+
     public void UpdateTileText()
     {
         _tileType = Data.TiType.ToString();
