@@ -23,11 +23,19 @@ public class CharacterMovement : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody>();
         _capsuleCollider = GetComponent<CapsuleCollider>();
+    }
+
+    private void OnEnable()
+    {
         EventManager.OnGameOver += OnGameOverTriggered;
         EventManager.OnGameWon += OnGameWonTriggered;
     }
 
-
+    private void OnDisable()
+    {
+        EventManager.OnGameOver -= OnGameOverTriggered;
+        EventManager.OnGameWon -= OnGameWonTriggered;
+    }
 
     private void FixedUpdate()
     {

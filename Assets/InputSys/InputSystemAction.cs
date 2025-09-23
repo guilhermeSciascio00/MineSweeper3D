@@ -142,6 +142,34 @@ public partial class @InputSystemAction: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""GameMenu"",
+            ""id"": ""3af37295-aafe-4023-84f8-dfbf20509fb3"",
+            ""actions"": [
+                {
+                    ""name"": ""GamePause"",
+                    ""type"": ""Button"",
+                    ""id"": ""786a44f1-bc49-48b2-b5da-d97b9f11dc61"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""cc5f5a14-9660-4e51-8098-f8a739fdd6c9"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GamePause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -153,12 +181,16 @@ public partial class @InputSystemAction: IInputActionCollection2, IDisposable
         // Camera
         m_Camera = asset.FindActionMap("Camera", throwIfNotFound: true);
         m_Camera_CameraZoom = m_Camera.FindAction("CameraZoom", throwIfNotFound: true);
+        // GameMenu
+        m_GameMenu = asset.FindActionMap("GameMenu", throwIfNotFound: true);
+        m_GameMenu_GamePause = m_GameMenu.FindAction("GamePause", throwIfNotFound: true);
     }
 
     ~@InputSystemAction()
     {
         UnityEngine.Debug.Assert(!m_Player.enabled, "This will cause a leak and performance issues, InputSystemAction.Player.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Camera.enabled, "This will cause a leak and performance issues, InputSystemAction.Camera.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_GameMenu.enabled, "This will cause a leak and performance issues, InputSystemAction.GameMenu.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -316,6 +348,52 @@ public partial class @InputSystemAction: IInputActionCollection2, IDisposable
         }
     }
     public CameraActions @Camera => new CameraActions(this);
+
+    // GameMenu
+    private readonly InputActionMap m_GameMenu;
+    private List<IGameMenuActions> m_GameMenuActionsCallbackInterfaces = new List<IGameMenuActions>();
+    private readonly InputAction m_GameMenu_GamePause;
+    public struct GameMenuActions
+    {
+        private @InputSystemAction m_Wrapper;
+        public GameMenuActions(@InputSystemAction wrapper) { m_Wrapper = wrapper; }
+        public InputAction @GamePause => m_Wrapper.m_GameMenu_GamePause;
+        public InputActionMap Get() { return m_Wrapper.m_GameMenu; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(GameMenuActions set) { return set.Get(); }
+        public void AddCallbacks(IGameMenuActions instance)
+        {
+            if (instance == null || m_Wrapper.m_GameMenuActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_GameMenuActionsCallbackInterfaces.Add(instance);
+            @GamePause.started += instance.OnGamePause;
+            @GamePause.performed += instance.OnGamePause;
+            @GamePause.canceled += instance.OnGamePause;
+        }
+
+        private void UnregisterCallbacks(IGameMenuActions instance)
+        {
+            @GamePause.started -= instance.OnGamePause;
+            @GamePause.performed -= instance.OnGamePause;
+            @GamePause.canceled -= instance.OnGamePause;
+        }
+
+        public void RemoveCallbacks(IGameMenuActions instance)
+        {
+            if (m_Wrapper.m_GameMenuActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IGameMenuActions instance)
+        {
+            foreach (var item in m_Wrapper.m_GameMenuActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_GameMenuActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public GameMenuActions @GameMenu => new GameMenuActions(this);
     public interface IPlayerActions
     {
         void OnMovement(InputAction.CallbackContext context);
@@ -324,5 +402,9 @@ public partial class @InputSystemAction: IInputActionCollection2, IDisposable
     public interface ICameraActions
     {
         void OnCameraZoom(InputAction.CallbackContext context);
+    }
+    public interface IGameMenuActions
+    {
+        void OnGamePause(InputAction.CallbackContext context);
     }
 }
