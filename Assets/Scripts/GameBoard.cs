@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
-using Unity.VisualScripting;
 
 public class GameBoard : MonoBehaviour
 {
@@ -24,6 +23,7 @@ public class GameBoard : MonoBehaviour
 
     private bool _firstTileRevealed = false;
     private bool _isGameOver = false;
+    private bool _playOnlyOnce = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -32,18 +32,34 @@ public class GameBoard : MonoBehaviour
         _tiles = new Tile[_boardSize.x, _boardSize.y];
         CreateTiles();
 
+        _totalNonMineTiles = (_boardSize.x * _boardSize.y) - _mineAmount;
+    }
+
+    private void OnEnable()
+    {
         EventManager.OnFirstTileRevealed += OnTileFirstRevealed;
         EventManager.OnGameOver += GameOverSequence;
         EventManager.OnTileJumped += TileJumped;
-        _totalNonMineTiles = (_boardSize.x * _boardSize.y) - _mineAmount;
+    }
+
+    private void OnDisable()
+    {
+        EventManager.OnFirstTileRevealed -= OnTileFirstRevealed;
+        EventManager.OnGameOver -= GameOverSequence;
+        EventManager.OnTileJumped -= TileJumped;
     }
 
     private void Update()
     {
         if (_tilesRevealed == _totalNonMineTiles)
         {
-            Debug.Log("You won!!!");
             EventManager.GameWon();
+            if (!_playOnlyOnce)
+            {
+                _audioManager.PlayWinningSFX();
+                _playOnlyOnce = true;
+            }
+            
         }
     }
 
@@ -67,6 +83,10 @@ public class GameBoard : MonoBehaviour
 
                 EventManager.GameOver();
             }
+            else if (obj.Data.TiType != TileData.TileType.Mine)
+            {
+                _audioManager.PlayDigSFX();
+            }
 
             FloodFillAlg(this, obj.Data.TilePosition);
         }
@@ -82,7 +102,11 @@ public class GameBoard : MonoBehaviour
     {
         foreach(Vector2Int minePos in _minePositions)
         {
-            if (_tiles[minePos.x, minePos.y].Data.IsRevealed) { yield return new WaitForSeconds(.4f); }
+            //Avoid the first tile that has been already exploded
+            if (_tiles[minePos.x, minePos.y].Data.IsRevealed)
+            {
+                continue;
+            }
 
             _tiles[minePos.x, minePos.y].GetComponent<Renderer>().material = _tiles[minePos.x, minePos.y].GetMineMaterial();
 

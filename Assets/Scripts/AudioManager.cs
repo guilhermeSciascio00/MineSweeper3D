@@ -8,30 +8,23 @@ public class AudioManager : MonoBehaviour
     [SerializeField] AudioClip _explosionEffect;
     private AudioSource _audioSource;
 
-    private void Start()
+    private void OnEnable()
     {
-        EventManager.OnTileJumped += TileJumpSound;
         _audioSource = GetComponent<AudioSource>();
-    }
-
-    private void TileJumpSound(Tile obj)
-    {
-        if (!obj.Data.IsRevealed)
-        {
-            switch (obj.Data.TiType)
-            {
-                case TileData.TileType.Mine:
-                    _audioSource?.PlayOneShot(_explosionEffect);
-                    break;
-                default:
-                    _audioSource?.PlayOneShot(_digEffect);
-                    break;
-            }
-        }
     }
 
     public void PlayExplosionSFX()
     {
         _audioSource?.PlayOneShot(_explosionEffect);
+    }
+
+    public void PlayDigSFX()
+    {
+        _audioSource?.PlayOneShot(_digEffect);
+    }
+
+    public void PlayWinningSFX()
+    {
+        _audioSource?.PlayOneShot(_winningEffect);
     }
 }

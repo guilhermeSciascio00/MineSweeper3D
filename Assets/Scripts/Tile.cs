@@ -83,7 +83,6 @@ public class Tile : MonoBehaviour
             if (!_explosionParticles.isPlaying)
             {
                 _explosionParticles.Play();
-                Debug.Log("Check");
             }
         }
     }

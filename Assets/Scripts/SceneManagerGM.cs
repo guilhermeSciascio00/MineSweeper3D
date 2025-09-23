@@ -15,12 +15,16 @@ public class SceneManagerGM : MonoBehaviour
 
     public void LoadGameScene()
     {
-        SceneManager.LoadSceneAsync(_currentSceneIndex+1);
+        SceneManager.LoadScene(_currentSceneIndex+1);
     }
 
     public void LoadMainMenu()
     {
-        SceneManager.LoadSceneAsync(MAIN_MENU_INDEX);
+        if(Time.timeScale <= 0f)
+        {
+            Time.timeScale = 1f;
+        }
+        SceneManager.LoadScene(MAIN_MENU_INDEX);
     }
 
     public void QuitApplication()
