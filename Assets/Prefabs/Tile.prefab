@@ -230,6 +230,7 @@ MonoBehaviour:
   _unrevealedMaterial: {fileID: 2100000, guid: c11860a8867024449966a96e49e9dac9, type: 2}
   _revealedMaterial: {fileID: 2100000, guid: 69440872970c2c341835ec75df406524, type: 2}
   _mineMaterial: {fileID: 2100000, guid: ea26f0a65354ea347921540ba40eb154, type: 2}
+  _flagMaterial: {fileID: 2100000, guid: 556e05ce515704243a96d0245c2fa9ed, type: 2}
   _explosionParticles: {fileID: 8481616771784725387}
   _minesAround: 0
   _tileType: 

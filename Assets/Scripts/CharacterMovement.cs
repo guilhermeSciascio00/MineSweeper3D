@@ -8,7 +8,7 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private float _rotationSpeed;
     private float _fallVelocity;
     //necessary for triggering the tile correctly
-    //private bool _hasJumped =false;
+    private bool _hasJumped = false;
 
     [Header("ChrMovement Class Reference")]
     [SerializeField] private GameInputManager _inputManagerRef;
@@ -43,8 +43,9 @@ public class CharacterMovement : MonoBehaviour
 
     private void Update()
     {
-        if (_groundDetection.IsOnGround(out _tileJumped) && _fallVelocity < 0f)
+        if (_groundDetection.IsOnGround(out _tileJumped) && _fallVelocity < 0f && _hasJumped)
         {
+            _hasJumped = false;
             if(_tileJumped != null)
             {
                 EventManager.TileJumped(_tileJumped);
@@ -101,6 +102,7 @@ public class CharacterMovement : MonoBehaviour
         if (_inputManagerRef.IsJumping())
         {
             _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
+            _hasJumped = true;
         }
     }
 

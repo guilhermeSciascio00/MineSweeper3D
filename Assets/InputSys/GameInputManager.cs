@@ -62,7 +62,7 @@ public class GameInputManager : MonoBehaviour
 
     public bool IsPauseButtonPressed() => _gamePause.WasPressedThisFrame();
 
-    public bool IsFlagButtonPressed => _flagTileAction.WasPerformedThisFrame();
+    public bool IsFlagButtonPressed() => _flagTileAction.WasPerformedThisFrame();
 
     private void EnableAllControls()
     {

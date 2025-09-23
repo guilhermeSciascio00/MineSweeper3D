@@ -8,6 +8,7 @@ public class UIMenuManager : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] List<TextMeshProUGUI> _elapsedTimeTexts;
     [SerializeField] float _elapsedTime;
+    [SerializeField] TextMeshProUGUI _flagAmountText;
     bool _timeFlag = false;
 
     [Header("References")]
@@ -15,6 +16,12 @@ public class UIMenuManager : MonoBehaviour
     [SerializeField] GameObject _gameMenuRef;
     [SerializeField] GameObject _gameOverScreen;
     [SerializeField] GameObject _gameWonScreen;
+    [SerializeField] FlagTile _flagTile;
+
+    private void Start()
+    {
+        UpdateFlagText();
+    }
 
     private void OnEnable()
     {
@@ -25,6 +32,7 @@ public class UIMenuManager : MonoBehaviour
         EventManager.OnFirstTileRevealed += GameStart;
         EventManager.OnGameWon += GameWonMenu;
         EventManager.OnGameOver += GameOverMenu;
+
     }
 
     private void OnDisable()
@@ -61,6 +69,11 @@ public class UIMenuManager : MonoBehaviour
             text.text = $"{t.Minutes:D2}:{t.Seconds:D2}";
         }
 
+    }
+
+    public void UpdateFlagText()
+    {
+        _flagAmountText.text = $"Flags: {_flagTile.GetFlagsAmount()}";
     }
 
     void GameWonMenu()

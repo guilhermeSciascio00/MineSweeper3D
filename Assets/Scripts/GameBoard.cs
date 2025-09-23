@@ -240,6 +240,9 @@ public class GameBoard : MonoBehaviour
         return _tiles[x, y];
     }
     
+    public int GetMinesAmount() => _mineAmount;
+
+    public bool HasGameStarted() => _firstTileRevealed;
     /// <summary>
     /// Returns true if the x,y coord values are inside the bounds, use this method when verifying neighbor tiles
     /// </summary>
