@@ -6,15 +6,18 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private float _movementSpeed;
     [SerializeField] private float _jumpForce;
     [SerializeField] private float _rotationSpeed;
+    private float _fallVelocity;
     //necessary for triggering the tile correctly
-    private bool _hasJumped =false;
+    //private bool _hasJumped =false;
 
     [Header("ChrMovement Class Reference")]
     [SerializeField] private GameInputManager _inputManagerRef;
     [SerializeField] private Transform _cameraTransform;
+    private GroundDetection _groundDetection;
 
     private Rigidbody _rb;
-    private CapsuleCollider _capsuleCollider;
+    private Tile _tileJumped;
+    //private CapsuleCollider _capsuleCollider;
 
     private bool _isGameFinished = false;
 
@@ -22,7 +25,8 @@ public class CharacterMovement : MonoBehaviour
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
-        _capsuleCollider = GetComponent<CapsuleCollider>();
+        //_capsuleCollider = GetComponent<CapsuleCollider>();
+        _groundDetection = GetComponent<GroundDetection>();
     }
 
     private void OnEnable()
@@ -37,11 +41,24 @@ public class CharacterMovement : MonoBehaviour
         EventManager.OnGameWon -= OnGameWonTriggered;
     }
 
+    private void Update()
+    {
+        if (_groundDetection.IsOnGround(out _tileJumped) && _fallVelocity < 0f)
+        {
+            if(_tileJumped != null)
+            {
+                EventManager.TileJumped(_tileJumped);
+            }
+        }
+    }
+
     private void FixedUpdate()
     {
         //MovePlayer();
         PlayerMovementAligned();
-        if (IsOnGround() && _inputManagerRef.IsJumping())
+        _fallVelocity = _rb.linearVelocity.y;
+
+        if (_groundDetection.IsOnGround(out _tileJumped))
         {
             PlayerJump();
         }
@@ -81,36 +98,36 @@ public class CharacterMovement : MonoBehaviour
 
     private void PlayerJump()
     {
-        _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
-        _hasJumped = true;
-    }
-
-    private bool IsOnGround()
-    {
-        const string FIELD_LAYER = "Field";
-
-        //Returns the center position of the capsule, the _rb.rotation will only be applied if the object is rotated, if not it's just _rb.position + 0,0,0 since _capsuleCollider.center is 0,0,0
-        Vector3 capsuleWorldCenter = _rb.position + _rb.rotation * _capsuleCollider.center;
-
-        //_capsuleHeight is 2 so 2/2 is 1 - r(radius) that is 0.5 we get 0.5
-        //_capsuleWorldCenter +(-) V3.UP helps us getting to the bottom and top spheres of the capsuleCollider.
-        Vector3 p1 = capsuleWorldCenter + Vector3.up * (_capsuleCollider.height / 2 - _capsuleCollider.radius);
-
-        Vector3 p2 = capsuleWorldCenter - Vector3.up * (_capsuleCollider.height / 2 - _capsuleCollider.radius);
-
-        //bool isOnGround = Physics.CheckCapsule(p1, p2, _capsuleCollider.radius + 0.02f, LayerMask.GetMask(FIELD_LAYER));
-
-        Collider[] hits = Physics.OverlapCapsule(p1, p2, _capsuleCollider.radius, LayerMask.GetMask(FIELD_LAYER));
-        
-        if(hits.Length > 0 && hits[0].GetComponent<Tile>() != null && _hasJumped)
+        if (_inputManagerRef.IsJumping())
         {
-            //Debug.Log(hits[0].name);
-            //Call the event
-            EventManager.TileJumped(hits[0].GetComponent<Tile>());
-            _hasJumped = false;
+            _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
         }
-
-        return hits.Length > 0;
     }
+
+    //private bool IsOnGround()
+    //{
+    //    const string FIELD_LAYER = "Field";
+
+    //    //Returns the center position of the capsule, the _rb.rotation will only be applied if the object is rotated, if not it's just _rb.position + 0,0,0 since _capsuleCollider.center is 0,0,0
+    //    Vector3 capsuleWorldCenter = _rb.position + _rb.rotation * _capsuleCollider.center;
+
+    //    //_capsuleHeight is 2 so 2/2 is 1 - r(radius) that is 0.5 we get 0.5
+    //    //_capsuleWorldCenter +(-) V3.UP helps us getting to the bottom and top spheres of the capsuleCollider.
+    //    Vector3 p1 = capsuleWorldCenter + Vector3.up * (_capsuleCollider.height / 2 - _capsuleCollider.radius);
+
+    //    Vector3 p2 = capsuleWorldCenter - Vector3.up * (_capsuleCollider.height / 2 - _capsuleCollider.radius);
+
+    //    Collider[] hits = Physics.OverlapCapsule(p1, p2, _capsuleCollider.radius, LayerMask.GetMask(FIELD_LAYER));
+        
+    //    if(hits.Length > 0 && hits[0].GetComponent<Tile>() != null && _hasJumped)
+    //    {
+    //        //Debug.Log(hits[0].name);
+    //        //Call the event
+    //        EventManager.TileJumped(hits[0].GetComponent<Tile>());
+    //        _hasJumped = false;
+    //    }
+
+    //    return hits.Length > 0;
+    //}
 
 }

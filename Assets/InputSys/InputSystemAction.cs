@@ -44,6 +44,15 @@ public partial class @InputSystemAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""FlagTile"",
+                    ""type"": ""Button"",
+                    ""id"": ""ad051728-8d78-45fd-8fc5-ea4f1e29fa04"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -112,6 +121,17 @@ public partial class @InputSystemAction: IInputActionCollection2, IDisposable
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""dddbb138-586f-4c50-8da3-21ae5b3f1fb0"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FlagTile"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -178,6 +198,7 @@ public partial class @InputSystemAction: IInputActionCollection2, IDisposable
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Movement = m_Player.FindAction("Movement", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
+        m_Player_FlagTile = m_Player.FindAction("FlagTile", throwIfNotFound: true);
         // Camera
         m_Camera = asset.FindActionMap("Camera", throwIfNotFound: true);
         m_Camera_CameraZoom = m_Camera.FindAction("CameraZoom", throwIfNotFound: true);
@@ -254,12 +275,14 @@ public partial class @InputSystemAction: IInputActionCollection2, IDisposable
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
     private readonly InputAction m_Player_Movement;
     private readonly InputAction m_Player_Jump;
+    private readonly InputAction m_Player_FlagTile;
     public struct PlayerActions
     {
         private @InputSystemAction m_Wrapper;
         public PlayerActions(@InputSystemAction wrapper) { m_Wrapper = wrapper; }
         public InputAction @Movement => m_Wrapper.m_Player_Movement;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
+        public InputAction @FlagTile => m_Wrapper.m_Player_FlagTile;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -275,6 +298,9 @@ public partial class @InputSystemAction: IInputActionCollection2, IDisposable
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
+            @FlagTile.started += instance.OnFlagTile;
+            @FlagTile.performed += instance.OnFlagTile;
+            @FlagTile.canceled += instance.OnFlagTile;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -285,6 +311,9 @@ public partial class @InputSystemAction: IInputActionCollection2, IDisposable
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
+            @FlagTile.started -= instance.OnFlagTile;
+            @FlagTile.performed -= instance.OnFlagTile;
+            @FlagTile.canceled -= instance.OnFlagTile;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -398,6 +427,7 @@ public partial class @InputSystemAction: IInputActionCollection2, IDisposable
     {
         void OnMovement(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+        void OnFlagTile(InputAction.CallbackContext context);
     }
     public interface ICameraActions
     {

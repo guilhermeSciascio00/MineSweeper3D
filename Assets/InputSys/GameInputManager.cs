@@ -9,6 +9,7 @@ public class GameInputManager : MonoBehaviour
     private InputAction _movementAction;
     private InputAction _jumpAction;
     private InputAction _gamePause;
+    private InputAction _flagTileAction;
 
     //PlayerCameraActions
 
@@ -21,13 +22,12 @@ public class GameInputManager : MonoBehaviour
         _jumpAction = _inputSysAction.Player.Jump;
         _cameraZoom = _inputSysAction.Camera.CameraZoom;
         _gamePause = _inputSysAction.GameMenu.GamePause;
-
+        _flagTileAction = _inputSysAction.Player.FlagTile;
        
     }
 
     private void EventManager_OnGameOver()
     {
-        Debug.Log("HEEY");
         DisableAllControls();
     }
 
@@ -62,12 +62,15 @@ public class GameInputManager : MonoBehaviour
 
     public bool IsPauseButtonPressed() => _gamePause.WasPressedThisFrame();
 
+    public bool IsFlagButtonPressed => _flagTileAction.WasPerformedThisFrame();
+
     private void EnableAllControls()
     {
         _movementAction.Enable();
         _jumpAction.Enable();
         _cameraZoom.Enable();
         _gamePause.Enable();
+        _flagTileAction.Enable();
     }
 
     private void DisableAllControls()
@@ -76,6 +79,7 @@ public class GameInputManager : MonoBehaviour
         _jumpAction?.Disable();
         _cameraZoom?.Disable();
         _gamePause?.Disable();
+        _flagTileAction?.Disable();
     }
 
 }
