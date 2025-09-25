@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: RevealedColor
-  m_Shader: {fileID: -6465566751694194690, guid: f7c9d74e39f4ec74695337e5e5e4741f, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 3f4d07b7c08e5444a86290a46c5ca53f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -115,14 +115,18 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     - _xBorderDistance: 0
+    - _xOffset: 0
     - _yBorderDistance: 0
+    - _yOffset: 0
     m_Colors:
     - _BaseColor: {r: 0.98293877, g: 0.98490566, b: 0.5630687, a: 1}
+    - _BoundColor: {r: 0.78867924, g: 0.7512837, b: 0.09374862, a: 1}
     - _BoundsColor: {r: 0.9245283, g: 0.8729835, b: 0.34015653, a: 1}
     - _Color: {r: 0.9829387, g: 0.98490566, b: 0.5630687, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _InsideColor: {r: 0.9622641, g: 0.9415955, b: 0.48476326, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _TileColor: {r: 0.91123015, g: 0.9490196, b: 0.29803923, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &4756828688977355015

@@ -23,7 +23,6 @@ public class GameInputManager : MonoBehaviour
         _cameraZoom = _inputSysAction.Camera.CameraZoom;
         _gamePause = _inputSysAction.GameMenu.GamePause;
         _flagTileAction = _inputSysAction.Player.FlagTile;
-       
     }
 
     private void EventManager_OnGameOver()
