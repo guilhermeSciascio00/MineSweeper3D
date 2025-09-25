@@ -33,19 +33,19 @@ public class FlagTile : MonoBehaviour
 
     private void FlagAndUnflagTile()
     {
-        if(_flagsAmount < 0 || !_gameBoardRef.HasGameStarted() || _tile.Data.IsRevealed) { return; }
+        if(!_gameBoardRef.HasGameStarted() || _tile.Data.IsRevealed || Time.timeScale <= 0f) { return; }
 
-        if(!_tile.Data.IsFlagged)
+        if(!_tile.Data.IsFlagged && _flagsAmount > 0)
         {
             _flagsAmount--;
             _tile.Data.IsFlagged = true;
-            _tile.SwitchToFlaggedMaterial();
+            _tile.PutFlag();
         }
-        else
+        else if(_tile.Data.IsFlagged && _flagsAmount >= 0)
         {
             _flagsAmount++;
             _tile.Data.IsFlagged = false;
-            _tile.SwitchToUnflaggedMaterial();
+            _tile.RemoveFlag();
         }
 
     }
