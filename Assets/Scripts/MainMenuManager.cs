@@ -3,13 +3,10 @@ using UnityEngine;
 public class MainMenuManager : MonoBehaviour
 {
 
-    //TODO Refactor this code tomorrow.
-
     [SerializeField] private GameObject _tutorialText;
     [SerializeField] private GameObject _tutorialText2;
     [SerializeField] private GameObject _nextTutorialBtn;
     [SerializeField] private GameObject _previousTutorialBtn;
-
 
     private void Start()
     {

@@ -18,7 +18,6 @@ public class Tile : MonoBehaviour
     [Header("DebugInfo")]
     [SerializeField] int _minesAround;
     [SerializeField] string _tileType;
-    [SerializeField] bool isFlagged;
 
     public TileData Data { get; private set; }
 
@@ -41,18 +40,12 @@ public class Tile : MonoBehaviour
         _flagObj.SetActive(false);
     }
 
-    private void Update()
-    {
-        isFlagged = Data.IsFlagged;
-    }
-
     public void InitializeData(TileData data)
     {
         Data = data;
     }
 
     //Visuals Revealed and Unrevealed.
-
 
     public void UpdateTileVisual()
     {

@@ -14,7 +14,6 @@ public class EventManager : MonoBehaviour
         OnTileJumped?.Invoke(tile);
     }
 
-    //Testing
     public static void FirstTileRevealed(Tile tile)
     {
         OnFirstTileRevealed?.Invoke(tile);
